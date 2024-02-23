@@ -8,20 +8,25 @@ class BitcoinAPI:
         self.bot = bot
         self.bitcoin_prices = {}
         self.price_endpoint = "https://mempool.space/api/v1/prices"
+        self.fees_endpoint = "https://mempool.space/api/v1/fees/recommended"
         self.update_prices()
+
+    @staticmethod
+    def query_api(endpoint):
+        try:
+            response = requests.get(endpoint)
+            response.raise_for_status()
+            data = response.json()
+            return data
+        except requests.exceptions.RequestException as e:
+            # Log the error
+            print(e)
 
     def get_current_price(self, currency):
         return int(self.bitcoin_prices[currency])
 
     def update_prices(self):
-        try:
-            response = requests.get(self.price_endpoint)
-            response.raise_for_status()
-            data = response.json()
-            self.bitcoin_prices = data
-        except requests.exceptions.RequestException as e:
-            # Log the error
-            print(e)
+        self.bitcoin_prices = self.query_api(self.price_endpoint)
 
     @tasks.loop(seconds=10)
     async def price_watch(self):
@@ -33,6 +38,9 @@ class BitcoinAPI:
         except Exception as e:
             # Log the error
             print(e)
+
+    async def recommended_fees(self):
+        return await self.query_api(self.fees_endpoint)
 
     async def start_price_watch(self):
         self.price_watch.start()
