@@ -9,7 +9,6 @@ class BitcoinAPI:
         self.bitcoin_prices = {}
         self.price_endpoint = "https://mempool.space/api/v1/prices"
         self.fees_endpoint = "https://mempool.space/api/v1/fees/recommended"
-        self.update_prices()
 
     @staticmethod
     def query_api(endpoint):
@@ -31,6 +30,7 @@ class BitcoinAPI:
     @tasks.loop(seconds=10)
     async def price_watch(self):
         try:
+            self.update_prices()
             activity = discord.Activity(
                 name=f"BTC: {self.get_current_price('USD')} USD",
                 type=discord.ActivityType.watching)
