@@ -56,7 +56,7 @@ class BitcoinAPI:
     def update_node_count(self):
         self.nodes_online = self.scraper.get_running_nodes()
 
-    @tasks.loop(seconds=30)
+    @tasks.loop(minutes=30)
     async def node_watch(self):
         try:
             self.update_node_count()
