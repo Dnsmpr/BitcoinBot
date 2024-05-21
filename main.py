@@ -42,4 +42,14 @@ async def fee(ctx: commands.Context):
     await ctx.send(embed=embed)
 
 
+@bot.command(name="price",
+             description="Get the current price of bitcoin in specified currency",
+             aliases=["prices", "p"])
+async def price(ctx: commands.Context, currency: str):
+    currency = currency.upper()
+    embed = discord.Embed(title="Current price of Bitcoin", color=discord.Color.green())
+    embed.add_field(name=f"Current price in {currency}: ", value=f"{api.get_current_price(currency)}", inline=True)
+    await ctx.send(embed=embed)
+
+
 bot.run(token)
