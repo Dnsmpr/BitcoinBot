@@ -44,8 +44,8 @@ class BitcoinAPI:
             # Log the error
             print(e)
 
-    async def recommended_fees(self):
-        return await self.query_api(self.fees_endpoint)
+    def recommended_fees(self):
+        return self.query_api(self.fees_endpoint)
 
     async def start_tasks(self):
         self.price_watch.start()

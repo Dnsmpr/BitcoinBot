@@ -30,4 +30,16 @@ async def graph(ctx: commands.Context, interval: str):
     await ctx.send(file=discord.File(g.show(api.get_kline(interval), interval), filename='graph.png'))
 
 
+@bot.command(name="fees", description="Get recommended fees.", aliases=["fee"])
+async def fee(ctx: commands.Context):
+    fees = api.recommended_fees()
+    embed = discord.Embed(title="Recommended Fees", color=discord.Color.green())
+    embed.add_field(name="Fastest Fee", value=f"{fees['fastestFee']} sats/vByte", inline=True)
+    embed.add_field(name="Half Hour Fee", value=f"{fees['halfHourFee']} sats/vByte", inline=True)
+    embed.add_field(name="Hour Fee", value=f"{fees['hourFee']} sats/vByte", inline=True)
+    embed.add_field(name="Economy Fee", value=f"{fees['economyFee']} sats/vByte", inline=True)
+    embed.add_field(name="Minimum Fee", value=f"{fees['minimumFee']} sats/vByte", inline=True)
+    await ctx.send(embed=embed)
+
+
 bot.run(token)
