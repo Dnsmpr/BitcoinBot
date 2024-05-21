@@ -13,6 +13,7 @@ class BitcoinAPI:
         self.nodes_online = 0
         self.price_endpoint = "https://mempool.space/api/v1/prices"
         self.fees_endpoint = "https://mempool.space/api/v1/fees/recommended"
+        self.kline_endpoint = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval="
 
     @staticmethod
     def query_api(endpoint):
@@ -63,3 +64,9 @@ class BitcoinAPI:
         except Exception as e:
             # Log the error
             print(e)
+
+    def get_kline(self, interval: str):
+        kline_intervals = ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d", "3d", "1w", "1M"]
+        if interval not in kline_intervals:
+            return "Invalid interval."
+        return self.query_api(self.kline_endpoint + interval)
