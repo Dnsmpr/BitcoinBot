@@ -14,6 +14,7 @@ class BitcoinAPI:
         self.price_endpoint = "https://mempool.space/api/v1/prices"
         self.fees_endpoint = "https://mempool.space/api/v1/fees/recommended"
         self.kline_endpoint = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval="
+        self.height_endpoint = "https://mempool.space/api/blocks/tip/height"
 
     @staticmethod
     def query_api(endpoint):
@@ -70,3 +71,6 @@ class BitcoinAPI:
         if interval not in kline_intervals:
             return "Invalid interval."
         return self.query_api(self.kline_endpoint + interval)
+
+    def get_height(self):
+        return self.query_api(self.height_endpoint)

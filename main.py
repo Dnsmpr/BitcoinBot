@@ -52,4 +52,9 @@ async def price(ctx: commands.Context, currency: str):
     await ctx.send(embed=embed)
 
 
+@bot.command(name="height", description="Get the current block height.")
+async def height(ctx: commands.Context):
+    await ctx.send(f"Current block height: {api.get_height()}")
+
+
 bot.run(token)
