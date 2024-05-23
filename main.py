@@ -59,7 +59,15 @@ async def price(ctx: commands.Context, currency: str):
 
 @bot.command(name="height", description="Get the current block height.")
 async def height(ctx: commands.Context):
-    await ctx.send(f"Current block height: {api.get_height()}")
+    block_height = api.get_height()
+    embed = discord.Embed(
+        title="🏗️ Current Block Height",
+        description="The current height of the blockchain is shown below:",
+        color=discord.Color.green()
+    )
+    embed.add_field(name="Block Height:", value=f"**{block_height}**", inline=False)
+    await ctx.send(embed=embed)
+
 
 
 @bot.command(name="mempool", description="Get the current block height.")
