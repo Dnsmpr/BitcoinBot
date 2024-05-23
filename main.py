@@ -96,5 +96,30 @@ async def mempool(ctx: commands.Context):
     embed.add_field(name="28MB - 36MB", value=f"{mempool_fee[5]} sats/vbyte", inline=True)
     await ctx.send(embed=embed)
 
+@bot.command(name="ls", description="Long short ratio")
+async def ls(ctx: commands.Context):
+    long, short, interest_btc, interest_usd = api.get_market_data()
+    interest_btc = float(interest_btc)
+    interest_usd = float(interest_usd)
+    long = float(long)
+    short = float(short)
+    embed = discord.Embed(
+        title="📊 Market Position Ratios",
+        description=(
+            "Here's the current long and short ratio for Bitcoin futures in both BTC and USD, "
+            "along with the open interest data:"
+        ),
+        color=discord.Color.dark_green()
+    )
+    embed.add_field(name="📈 Long Ratio (%)", value=f"{long * 100:.3f}%", inline=True)
+    embed.add_field(name="💵 Long Ratio (USD)", value=f"${long * interest_usd:,.0f}", inline=True)
+    embed.add_field(name="₿ Long Ratio (BTC)", value=f"{long * interest_btc:,.0f} BTC", inline=True)
+    embed.add_field(name="📉 Short Ratio (%)", value=f"{short * 100:,.3f}%", inline=True)
+    embed.add_field(name="💵 Short Ratio (USD)", value=f"${short * interest_usd:,.0f}", inline=True)
+    embed.add_field(name="₿ Short Ratio (BTC)", value=f"{short * interest_btc:,.0f} BTC", inline=True)
+
+
+    await ctx.send(embed=embed)
+
 
 bot.run(token)

@@ -18,6 +18,8 @@ class BitcoinAPI:
         self.kline_endpoint = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval="
         self.height_endpoint = "https://mempool.space/api/blocks/tip/height"
         self.mempool_endpoint = "https://mempool.space/api/mempool"
+        self.long_short_endpoint = "https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=5m&limit=1"
+        self.open_interest_endpoint = "https://fapi.binance.com/futures/data/openInterestHist?symbol=BTCUSDT&period=5m&limit=1"
 
     @staticmethod
     def query_api(endpoint):
@@ -105,6 +107,20 @@ class BitcoinAPI:
                 tx.append(entry)
             else:
                 return min(tx, key=lambda x: x[0])[0], max(tx, key=lambda x: x[0])[0], index
+
+    def get_long_short_ratio(self):
+        ls = self.query_api(self.long_short_endpoint)[0]
+        return ls["longAccount"], ls["shortAccount"]
+
+    def get_open_interest(self):
+        oi = self.query_api(self.open_interest_endpoint)[0]
+        return oi["sumOpenInterest"], oi["sumOpenInterestValue"]
+
+    def get_market_data(self):
+        long, short = self.get_long_short_ratio()
+        interest_btc, interest_usd = self.get_open_interest()
+
+        return long, short, interest_btc, interest_usd
 
 
 
