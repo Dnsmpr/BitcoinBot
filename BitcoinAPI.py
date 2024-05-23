@@ -4,6 +4,8 @@ from discord.ext import commands, tasks
 
 import Scraper
 
+ONE_MB = 1000000
+
 
 class BitcoinAPI:
     def __init__(self, bot: discord.ext.commands.Bot, scraper: Scraper):
@@ -15,6 +17,7 @@ class BitcoinAPI:
         self.fees_endpoint = "https://mempool.space/api/v1/fees/recommended"
         self.kline_endpoint = "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval="
         self.height_endpoint = "https://mempool.space/api/blocks/tip/height"
+        self.mempool_endpoint = "https://mempool.space/api/mempool"
 
     @staticmethod
     def query_api(endpoint):
@@ -74,3 +77,34 @@ class BitcoinAPI:
 
     def get_height(self):
         return self.query_api(self.height_endpoint)
+
+    def get_mempool(self):
+        data = self.query_api(self.mempool_endpoint)
+        fee_hist = data["fee_histogram"]
+        mb_range = [ONE_MB, 4 * ONE_MB, 12 * ONE_MB, 20 * ONE_MB, 28 * ONE_MB, 36 * ONE_MB]
+        mempool = [(data["count"], data["vsize"], data["total_fee"])]
+        fee_range = []
+        index = 0
+        for s in mb_range:
+            min_range, max_range, index = self.get_mempool_size(fee_hist[index:], s, index)
+            fee_range.append((int(min_range), int(max_range)))
+
+        mempool.append(fee_range)
+
+        return mempool
+
+
+    def get_mempool_size(self, fee_hist, mb_range, index):
+
+        acc = 0
+        tx = []
+        for entry in fee_hist:
+            index += 1
+            if acc + entry[1] <= mb_range:
+                acc = acc + entry[1]
+                tx.append(entry)
+            else:
+                return min(tx, key=lambda x: x[0])[0], max(tx, key=lambda x: x[0])[0], index
+
+
+

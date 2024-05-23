@@ -57,4 +57,25 @@ async def height(ctx: commands.Context):
     await ctx.send(f"Current block height: {api.get_height()}")
 
 
+@bot.command(name="mempool", description="Get the current block height.")
+async def mempool(ctx: commands.Context):
+    mempool_data, mempool_fee = api.get_mempool()
+    embed = discord.Embed(
+        title=(
+            f"Mempool Summary: {mempool_data[0]} transactions, "
+            f"totaling {int(mempool_data[1] / 1_000_000)} MB, "
+            f"with {int(mempool_data[2] / 100_000_000)} BTC in fees"
+        ),
+        color=discord.Color.green()
+    )
+
+    embed.add_field(name="0MB  - 1MB", value=f"{mempool_fee[0]} sats/vbyte", inline=True)
+    embed.add_field(name="1MB  - 4MB", value=f"{mempool_fee[1]} sats/vbyte", inline=True)
+    embed.add_field(name="4MB  - 12MB", value=f"{mempool_fee[2]} sats/vbyte", inline=True)
+    embed.add_field(name="12MB - 20MB", value=f"{mempool_fee[3]} sats/vbyte", inline=True)
+    embed.add_field(name="20MB - 28MB", value=f"{mempool_fee[4]} sats/vbyte", inline=True)
+    embed.add_field(name="28MB - 36MB", value=f"{mempool_fee[5]} sats/vbyte", inline=True)
+    await ctx.send(embed=embed)
+
+
 bot.run(token)
