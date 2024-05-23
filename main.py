@@ -20,9 +20,17 @@ async def on_ready():
     await api.start_tasks()
 
 
-@bot.command(name="nodes", description="Get total amount of nodes.")
+@bot.command(name="nodes", description="Get the total amount of nodes.")
 async def nodes(ctx: commands.Context):
-    await ctx.send(f'{api.get_nodes_online()}')
+    nodes_online = api.get_nodes_online()  # Retrieve the total amount of nodes
+    embed = discord.Embed(
+        title="🌐 Total Nodes Online",
+        description="The current total number of active nodes in the network is displayed below:",
+        color=discord.Color.orange()  # You can choose a color that fits your bot's theme
+    )
+    embed.add_field(name="Nodes Online:", value=f"**{nodes_online}**", inline=False)
+    await ctx.send(embed=embed)
+
 
 
 @bot.command(name="graph")
