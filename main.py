@@ -32,7 +32,6 @@ async def nodes(ctx: commands.Context):
     await ctx.send(embed=embed)
 
 
-
 @bot.command(name="graph")
 async def graph(ctx: commands.Context, interval: str):
     await ctx.send(file=discord.File(g.show(api.get_kline(interval), interval), filename='graph.png'))
@@ -75,7 +74,6 @@ async def height(ctx: commands.Context):
     )
     embed.add_field(name="Block Height:", value=f"**{block_height}**", inline=False)
     await ctx.send(embed=embed)
-
 
 
 @bot.command(name="mempool", description="Get the current block height.")
