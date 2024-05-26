@@ -1,8 +1,14 @@
+import asyncio
+import json
+import time
+
 import discord
 import requests
 from discord.ext import commands, tasks
 
 import Scraper
+
+import websockets
 
 ONE_MB = 1000000
 
@@ -20,6 +26,7 @@ class BitcoinAPI:
         self.mempool_endpoint = "https://mempool.space/api/mempool"
         self.long_short_endpoint = "https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=5m&limit=1"
         self.open_interest_endpoint = "https://fapi.binance.com/futures/data/openInterestHist?symbol=BTCUSDT&period=5m&limit=1"
+        self.websocket_price_endpoint = "wss://fstream.binance.com/ws/btcusdt@markPrice"
 
     @staticmethod
     def query_api(endpoint):
@@ -38,24 +45,25 @@ class BitcoinAPI:
     def update_prices(self):
         self.bitcoin_prices = self.query_api(self.price_endpoint)
 
-    @tasks.loop(seconds=10)
-    async def price_watch(self):
-        try:
-            self.update_prices()
-            activity = discord.Activity(
-                name=f"BTC: {self.get_current_price('USD')} USD",
-                type=discord.ActivityType.watching)
-            await self.bot.change_presence(activity=activity, status=discord.Status.online)
-        except Exception as e:
-            # Log the error
-            print(e)
+    # @tasks.loop(seconds=10)
+    # async def price_watch(self):
+    #     try:
+    #         self.update_prices()
+    #         activity = discord.Activity(
+    #             name=f"BTC: {self.get_current_price('USD')} USD",
+    #             type=discord.ActivityType.watching)
+    #         await self.bot.change_presence(activity=activity, status=discord.Status.online)
+    #     except Exception as e:
+    #         # Log the error
+    #         print(e)
 
     def recommended_fees(self):
         return self.query_api(self.fees_endpoint)
 
     async def start_tasks(self):
-        self.price_watch.start()
+        # self.price_watch.start()
         self.node_watch.start()
+        asyncio.create_task(self.connect_to_websocket())
 
     def get_nodes_online(self):
         return self.nodes_online
@@ -95,7 +103,6 @@ class BitcoinAPI:
 
         return mempool
 
-
     def get_mempool_size(self, fee_hist, mb_range, index):
 
         acc = 0
@@ -122,5 +129,25 @@ class BitcoinAPI:
 
         return long, short, interest_btc, interest_usd
 
+    async def change_presence(self, message):
+        activity = discord.Activity(
+            name=message,
+            type=discord.ActivityType.watching)
+        await self.bot.change_presence(activity=activity, status=discord.Status.online)
 
+    async def connect_to_websocket(self):
+        while True:
+            try:
+                print("Attempting to connect to WebSocket...")
+                async with websockets.connect(
+                        self.websocket_price_endpoint) as websocket:
+                    print("Connected to WebSocket.")
+                    while True:
+                        message = await websocket.recv()
+                        print(message)
+                        await self.change_presence(f"BTC: {int(float(json.loads(message)['p']))} USD")
 
+            except Exception as e:
+                print(f"WebSocket connection error: {e}")
+                await asyncio.sleep(10)
+                print("Attempting to reconnect to WebSocket...")
